@@ -1,5 +1,5 @@
 fastapi
 pillow
-json==2.0.9
+json
 uvicorn
 pathlib
