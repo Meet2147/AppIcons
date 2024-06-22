@@ -102,6 +102,19 @@ def process_image(input_path: str, output_directory: str):
     if not os.path.exists(appiconset_dir):
         os.makedirs(appiconset_dir)
 
+    # Create directories for android
+    android_dirs = {
+        "mipmap-hdpi": (72, 72),
+        "mipmap-mdpi": (48, 48),
+        "mipmap-xhdpi": (96, 96),
+        "mipmap-xxhdpi": (144, 144),
+        "mipmap-xxxhdpi": (192, 192)
+    }
+    for dir_name in android_dirs.keys():
+        android_dir = os.path.join(output_directory, "android", dir_name)
+        if not os.path.exists(android_dir):
+            os.makedirs(android_dir)
+
     # Generate resized icons for AppIcon.appiconset based on the JSON specification
     appiconset_sizes = [
         (60, 60), (40, 40), (120, 120), (57, 57), (29, 29), (87, 87), (114, 114), 
@@ -118,6 +131,24 @@ def process_image(input_path: str, output_directory: str):
             resized_icon.save(output_path)
         except Exception as e:
             print(f"Error resizing image to {size} for AppIcon.appiconset: {e}")
+
+    # Generate resized icons for android
+    for dir_name, size in android_dirs.items():
+        try:
+            resized_icon = original_icon.resize(size, Image.LANCZOS)
+            output_path = os.path.join(output_directory, "android", dir_name, f'icon_{size[0]}x{size[1]}.png')
+            resized_icon.save(output_path)
+        except Exception as e:
+            print(f"Error resizing image to {size} for android: {e}")
+
+    # Generate appstore and playstore images
+    try:
+        resized_icon_appstore = original_icon.resize((1024, 1024), Image.LANCZOS)
+        resized_icon_playstore = original_icon.resize((512, 512), Image.LANCZOS)
+        resized_icon_appstore.save(os.path.join(output_directory, 'appstore.png'))
+        resized_icon_playstore.save(os.path.join(output_directory, 'playstore.png'))
+    except Exception as e:
+        print(f"Error resizing image for appstore or playstore: {e}")
 
     # Save the JSON file for AppIcon.appiconset
     json_path = os.path.join(appiconset_dir, "Contents.json")
